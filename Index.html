@@ -1,0 +1,1459 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Secret Letter</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    :root{
+      --bg:#f3efe6;
+      --card:#ffffff;
+      --ink:#1f2937;
+      --muted:#6b7280;
+      --paper:#fffdf7;
+      --paper2:#fff7e6;
+      --seal:#b91c1c;
+      --stroke:rgba(0,0,0,.10);
+      --shadow:rgba(0,0,0,.14);
+      --radius:18px;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0; min-height:100vh;
+      display:grid; place-items:center;
+      background:
+        radial-gradient(900px 420px at 20% 10%, rgba(255,255,255,.55), transparent 60%),
+        radial-gradient(700px 380px at 80% 20%, rgba(255,255,255,.35), transparent 60%),
+        var(--bg);
+      color:var(--ink);
+      font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans Arabic", "Noto Sans", Arial;
+      padding:22px;
+    }
+    .wrap{width:min(720px, 96vw)}
+    .card{
+      background:var(--card);
+      border:1px solid var(--stroke);
+      border-radius:var(--radius);
+      box-shadow: 0 18px 40px var(--shadow);
+      padding:18px;
+    }
+    .hidden{display:none !important}
+    h1,h2{margin:0 0 10px}
+    p{margin:8px 0; color:var(--muted); line-height:1.8}
+    .row{display:flex; gap:10px; align-items:center; flex-wrap:wrap}
+    input, textarea{
+      width:100%;
+      padding:12px 14px;
+      border:1px solid var(--stroke);
+      border-radius:14px;
+      font-size:16px;
+      outline:none;
+      background:#fff;
+    }
+    textarea{min-height:140px; resize:vertical}
+    .btn{
+      padding:12px 14px;
+      border:0;
+      border-radius:14px;
+      cursor:pointer;
+      font-size:15px;
+      font-weight:700;
+      background:#111827;
+      color:#fff;
+      box-shadow: 0 10px 20px rgba(0,0,0,.18);
+    }
+    .btn:active{transform:translateY(1px)}
+    .btn.ghost{
+      background:#fff;
+      color:#111827;
+      border:1px solid var(--stroke);
+      box-shadow:none;
+    }
+    .err{
+      display:none;
+      margin-top:10px;
+      padding:10px 12px;
+      border-radius:14px;
+      background:rgba(185,28,28,.08);
+      color:#991b1b;
+      border:1px solid rgba(185,28,28,.25);
+      line-height:1.8;
+    }
+    .hint{
+      font-size:13px;
+      color:var(--muted);
+    }
+    .divider{height:1px; background:var(--stroke); margin:14px 0}
+
+    /* ===== Envelope Scene ===== */
+    .stage{
+      display:grid;
+      place-items:center;
+      padding:24px 10px 8px;
+    }
+    .envelope-wrap{
+      width:min(520px, 92vw);
+      position:relative;
+      padding-top:16px;
+    }
+
+    .meta-badge{
+      display:flex; justify-content:space-between; gap:10px;
+      width:100%;
+      font-size:13px;
+      color:rgba(31,41,55,.75);
+      margin:0 auto 12px;
+      padding:10px 12px;
+      border:1px dashed rgba(0,0,0,.18);
+      border-radius:14px;
+      background: rgba(255,255,255,.6);
+      backdrop-filter: blur(4px);
+      flex-direction: row-reverse;
+    }
+    .meta-badge span{white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+
+    .envelope{
+      width:100%;
+      height:280px;
+      position:relative;
+      perspective:1000px;
+      user-select:none;
+    }
+
+    /* body of envelope */
+    .env-body{
+      position:absolute; inset:0;
+      border-radius:20px;
+      background: linear-gradient(180deg, #fff7df, #fdebbd);
+      border:1px solid rgba(0,0,0,.10);
+      overflow:hidden;
+      box-shadow: 0 22px 45px rgba(0,0,0,.18);
+      overflow: hidden; 
+    }
+
+    /* subtle texture */
+    .env-body:before{
+      content:"";
+      position:absolute; inset:0;
+      background:
+        radial-gradient(900px 220px at 20% 30%, rgba(255,255,255,.60), transparent 55%),
+        repeating-linear-gradient(0deg, rgba(0,0,0,.02), rgba(0,0,0,.02) 1px, transparent 1px, transparent 5px);
+      opacity:.9;
+      pointer-events:none;
+    }
+
+    /* stamp */
+    .stamp{
+      position:absolute;
+      top:18px; left:18px;
+      width:56px; height:70px;
+      border-radius:10px;
+      background: linear-gradient(180deg,#ffffff,#f3f4f6);
+      border:1px solid rgba(0,0,0,.18);
+      box-shadow: 0 10px 20px rgba(0,0,0,.12);
+      transform: rotate(-6deg);
+    }
+    .stamp:before{
+      content:"";
+      position:absolute; inset:8px;
+      border-radius:8px;
+      border:2px dashed rgba(185,28,28,.55);
+    }
+    .stamp:after{
+      content:"✦";
+      position:absolute; inset:0;
+      display:grid; place-items:center;
+      color:rgba(185,28,28,.70);
+      font-size:22px;
+    }
+
+    /* wax seal */
+    .seal{
+      position:absolute;
+      bottom:88px; left:50%;
+      transform:translateX(-50%);
+      width:64px; height:64px;
+      border-radius:999px;
+      background: radial-gradient(circle at 30% 30%, rgba(255,255,255,.35), transparent 35%),
+                  linear-gradient(180deg, #dc2626, #991b1b);
+      box-shadow: 0 16px 26px rgba(0,0,0,.25);
+      border:1px solid rgba(0,0,0,.18);
+      display:grid; place-items:center;
+      color:rgba(255,255,255,.92);
+      font-weight:900;
+      letter-spacing:1px;
+    }
+    .seal small{opacity:.9; font-size:14px}
+
+    /* address lines */
+    .address{
+      position:absolute;
+      top:108px; right:22px; left:90px;
+      display:flex; flex-direction:column; gap:10px;
+      color:rgba(31,41,55,.82);
+      font-size:14px;
+    }
+    .line{
+      height:12px;
+      border-radius:999px;
+      background: rgba(0,0,0,.06);
+    }
+    .line.w1{width:80%}
+    .line.w2{width:62%}
+    .line.w3{width:74%}
+
+    /* front triangle */
+    .front{
+      position:absolute; inset:0;
+      clip-path: polygon(0 100%, 50% 55%, 100% 100%, 100% 100%, 0 100%);
+      background: linear-gradient(180deg, rgba(255,255,255,.2), rgba(0,0,0,.06));
+      border-radius:20px;
+      pointer-events:none;
+    }
+
+    /* flap */
+    .flap{
+      position:absolute; left:0; right:0; top:0;
+      height:150px;
+      transform-origin: top center;
+      transform: rotateX(0deg);
+      transition: transform 900ms cubic-bezier(.2,.8,.2,1);
+      filter: drop-shadow(0 12px 18px rgba(0,0,0,.16));
+      cursor:pointer;
+      z-index:5;
+    }
+    .flap:before{
+      content:"";
+      position:absolute; inset:0;
+      clip-path: polygon(0 0, 50% 100%, 100% 0);
+      background: linear-gradient(180deg, #fff1c7, #f8d98c);
+      border:1px solid rgba(0,0,0,.10);
+    }
+
+    .cta{
+      position:absolute;
+      top:18px; left:50%;
+      transform: translateX(-50%);
+      z-index:6;
+      background: rgba(255,255,255,.72);
+      border:1px solid rgba(0,0,0,.12);
+      padding:8px 12px;
+      border-radius:999px;
+      font-weight:800;
+      font-size:12px;
+      color:rgba(31,41,55,.88);
+      box-shadow: 0 7px 10px rgba(0,0,0,.12);
+      cursor:pointer;
+    }
+
+    /* letter paper that slides out */
+    .paper{
+      position:absolute;
+      left:22px; right:22px;
+      bottom:22px;
+      height:260px;
+      border-radius:18px;
+      background:
+        radial-gradient(1200px 380px at 10% 10%, rgba(255,255,255,.70), transparent 55%),
+        linear-gradient(180deg, var(--paper), var(--paper2));
+      border:1px solid rgba(0,0,0,.10);
+      box-shadow: 0 18px 40px rgba(0,0,0,.18);
+      transform: translateY(130px);
+      transition: transform 1000ms cubic-bezier(.2,.85,.2,1);
+  opacity 300ms ease;
+      z-index:2;
+      overflow:hidden;
+    }
+    .paper:before{
+      content:"";
+      position:absolute; inset:0;
+      background:
+        repeating-linear-gradient(0deg, rgba(0,0,0,.035), rgba(0,0,0,.035) 1px, transparent 1px, transparent 10px);
+      opacity:.35;
+      pointer-events:none;
+    }
+    .paper-inner{
+      position:absolute; inset:18px;
+      display:flex; flex-direction:column;
+      gap:10px;
+    }
+    .paper-title{
+      font-weight:900;
+      letter-spacing:.2px;
+      color:rgba(31,41,55,.90);
+      text-align:left;
+      direction:ltr;
+    }
+    .paper-text{
+      white-space:pre-wrap;
+      line-height:2.05;
+      font-size:16px;
+      color:rgba(31,41,55,.92);
+      overflow-y:auto;
+      max-height:160px;
+      padding-right:6px;
+    }
+
+    .open .flap{ transform: rotateX(-160deg); }
+    .open .paper{ transform: translateY(0px); }
+
+    .tap-hint{
+      margin-top:14px;
+      text-align:center;
+      color:var(--muted);
+      font-size:13px;
+    }
+
+    /* ===== Builder ===== */
+    .builder{
+      background: rgba(255,255,255,.92);
+    }
+    .codebox{
+      width:100%;
+      min-height:160px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+      font-size:13px;
+      line-height:1.6;
+      padding:12px 14px;
+      border-radius:14px;
+      border:1px solid var(--stroke);
+      background:#0b1220;
+      color:#e5e7eb;
+      white-space:pre;
+      overflow:auto;
+    }
+    .pill{
+      display:inline-flex; align-items:center; gap:8px;
+      padding:6px 10px;
+      border-radius:999px;
+      border:1px solid var(--stroke);
+      background:rgba(255,255,255,.6);
+      font-size:12px;
+      color:rgba(31,41,55,.85);
+    }
+    /* --- FIX: meta order + better RTL/LTR handling --- */
+.meta-badge{
+  flex-direction: row-reverse; /* جای From/To درست میشه */
+}
+.meta-badge span{
+  direction: rtl;
+  unicode-bidi: plaintext; /* ایموجی/انگلیسی قاطی نکنه */
+}
+/* --- FIX: long letter scroll --- */
+.paper-text{
+  overflow-y: auto;
+  max-height: 165px;
+  padding-right: 6px;
+  text-align: right;
+  direction: rtl;
+}
+/* --- Mobile fit improvements --- */
+.envelope{ height: 280px; }
+.flap{ height: 150px; }
+.cta{
+  top: 18px;
+  font-size: 12px;
+  padding: 7px 10px;
+  -webkit-tap-highlight-color: transparent;
+}
+.flap{ -webkit-tap-highlight-color: transparent; }
+/* --- FIX: hide paper before open --- */
+.paper{
+  opacity: 0;
+  pointer-events: none;
+}
+
+.open .paper{
+  opacity: 1;
+  pointer-events: auto;
+}
+/* --- FIX: center envelope perfectly --- */
+.envelope-wrap{
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.envelope{
+  margin: 0 auto;
+}
+.stage{
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+.open .cta{ opacity: 0; pointer-events: none; transform: translateX(-50%) translateY(-6px); transition: 300ms; }
+.cta{ transition: 300ms; }
+/* =========================
+   ✨ Login Theme: Clouds + Strawberry + Glass Card
+   ========================= */
+
+/* پس‌زمینه سفید/آسمانی */
+body{
+  background:
+    radial-gradient(900px 520px at 20% 10%, rgba(96,165,250,.22), transparent 60%),
+    radial-gradient(760px 420px at 80% 18%, rgba(147,197,253,.18), transparent 60%),
+    radial-gradient(900px 520px at 50% 90%, rgba(255,255,255,1), rgba(255,255,255,1)),
+    #ffffff !important;
+}
+
+/* لایه دکور */
+.bg-decor{
+  position:fixed;
+  inset:0;
+  pointer-events:none;
+  z-index:0;
+  overflow:hidden;
+}
+
+/* ابرها (مینیمال و آبی) */
+.bg-decor .cloud{
+  position:absolute;
+  font-size:42px;
+  opacity:.35;
+  filter: hue-rotate(180deg) saturate(1.6);
+  transform: translateZ(0);
+}
+.bg-decor .c1{ top:9%;  left:8%;  font-size:44px; opacity:.32;}
+.bg-decor .c2{ top:14%; right:12%; font-size:52px; opacity:.28;}
+.bg-decor .c3{ top:42%; left:14%; font-size:38px; opacity:.24;}
+.bg-decor .c4{ top:55%; right:16%; font-size:42px; opacity:.22;}
+
+/* توت‌فرنگی‌ها */
+.bg-decor .berry{
+  position:absolute;
+  font-size:26px;
+  opacity:.22;
+  transform: rotate(-10deg);
+}
+.bg-decor .b1{ top:26%; left:22%; }
+.bg-decor .b2{ top:68%; right:22%; opacity:.18; }
+.bg-decor .b3{ top:36%; right:30%; opacity:.16; }
+/* ✅ clouds positions (spread across page) */
+.bg-decor .c5{ top:72%; left:10%;  font-size:48px; opacity:.22;}
+.bg-decor .c6{ top:78%; right:12%; font-size:44px; opacity:.20;}
+.bg-decor .c7{ top:88%; left:55%; font-size:54px; opacity:.18;}
+
+/* ✅ berries positions (spread) */
+.bg-decor .b4{ top:62%; left:26%; font-size:24px; opacity:.16; transform: rotate(12deg); }
+.bg-decor .b5{ top:82%; right:28%; font-size:28px; opacity:.14; transform: rotate(-14deg); }
+.bg-decor .b6{ top:92%; left:18%; font-size:22px; opacity:.12; transform: rotate(8deg); }
+
+/* ✅ soft bottom tint so it doesn't feel empty */
+body{
+  background:
+    radial-gradient(900px 520px at 20% 10%, rgba(96,165,250,.22), transparent 60%),
+    radial-gradient(760px 420px at 80% 18%, rgba(147,197,253,.18), transparent 60%),
+    radial-gradient(900px 520px at 50% 92%, rgba(96,165,250,.12), transparent 60%),
+    linear-gradient(180deg, #ffffff 0%, #ffffff 55%, rgba(224,242,254,.55) 100%) !important;
+}
+/* بارش حروف */
+.rain{
+  position:fixed;
+  inset:0;
+  pointer-events:none;
+  z-index:1; /* بالای بک‌گراند، پشت کارت */
+  overflow:hidden;
+}
+.rain .drop{
+  position:absolute;
+  top:-40px;
+  font-family:"Fredoka", ui-sans-serif, system-ui;
+  font-weight:700;
+  font-size:18px;
+  opacity:.85;
+  color: rgba(59,130,246,.92);
+  text-shadow:
+    0 0 10px rgba(59,130,246,.35),
+    0 0 18px rgba(147,197,253,.22);
+  animation: fall linear forwards;
+  user-select:none;
+  will-change: transform, opacity;
+}
+@keyframes fall{
+  0%   { transform: translateY(-40px); opacity: 0; }
+  8%   { opacity: .9; }
+  100% { transform: translateY(110vh); opacity: 0; }
+}
+
+/* کارت شیشه‌ای */
+#lockCard{
+  position:relative;
+  z-index:2;
+  background: rgba(255,255,255,.34) !important;
+  border: 1px solid rgba(255,255,255,.55) !important;
+  box-shadow:
+    0 22px 60px rgba(0,0,0,.12),
+    0 1px 0 rgba(255,255,255,.55) inset !important;
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+
+/* تیتر انگلیسی گوگولی */
+.lock-hero{
+  display:flex;
+  justify-content:center;
+  margin-bottom:10px;
+}
+.lock-title{
+  font-family:"Fredoka", ui-sans-serif, system-ui;
+  font-weight:700;
+  letter-spacing:.2px;
+  font-size:20px;
+  color: rgba(30,58,138,.92);
+  text-align:center;
+}
+
+/* مرتب‌تر شدن متن‌های فارسی زیرش */
+#lockCard h2{
+  text-align:center;
+}
+#lockCard p{
+  text-align:center;
+}
+
+/* چیدمان لاگین (اگر قبلاً lock-row گذاشتی خوبه) */
+.lock-row{
+  width:100%;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:12px;
+}
+.lock-row #pw{
+  width:min(420px, 100%);
+  text-align:center;
+  background: rgba(255,255,255,.60);
+  border: 1px solid rgba(59,130,246,.18);
+}
+@media (min-width: 520px){
+  .lock-row{
+    flex-direction:row;
+    justify-content:center;
+  }
+  .lock-row #pw{ width:320px; }
+}
+
+/* دکمه باز کن: Rounded + Glow */
+#unlockBtn{
+  border-radius:999px !important;
+  padding:12px 18px !important;
+  background: linear-gradient(180deg, rgba(59,130,246,1), rgba(37,99,235,1)) !important;
+  box-shadow:
+    0 16px 30px rgba(37,99,235,.28),
+    0 0 22px rgba(147,197,253,.35);
+}
+#unlockBtn: #unlockBtn:hover{
+  box-shadow:
+    0 18px 36px rgba(37,99,235,.35),
+    0 0 30px rgba(147,197,253,.55);
+  transform: translateY(-1px);
+}
+
+/* اگر هنوز دکمه Builder جایی هست، مخفی‌اش کن */
+#builderBtn{ display:none !important; }
+/* ✅ Pretty password box */
+.pw-field{
+  width:min(420px, 100%);
+  display:flex;
+  align-items:center;
+  gap:10px;
+  padding:10px 12px;
+  border-radius:999px;
+  background: rgba(255,255,255,.55);
+  border: 1px solid rgba(59,130,246,.18);
+  box-shadow:
+    0 10px 26px rgba(0,0,0,.08),
+    0 1px 0 rgba(255,255,255,.65) inset;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  transition: box-shadow 180ms ease, border-color 180ms ease, transform 180ms ease;
+}
+
+.pw-icon{
+  font-size:18px;
+  opacity:.85;
+}
+
+.pw-field input{
+  border:0 !important;
+  outline:none !important;
+  background:transparent !important;
+  padding:8px 2px !important;
+  font-size:16px;
+  width:100%;
+  text-align:center;
+  color: rgba(17,24,39,.92);
+}
+
+.pw-field input::placeholder{
+  color: rgba(107,114,128,.85);
+}
+
+.pw-field:focus-within{
+  border-color: rgba(59,130,246,.40);
+  box-shadow:
+    0 16px 34px rgba(37,99,235,.16),
+    0 0 0 4px rgba(147,197,253,.22);
+  transform: translateY(-1px);
+}
+
+.pw-toggle{
+  border:0;
+  background: transparent;
+  cursor: pointer;
+  font-size:18px;
+  padding:6px 8px;
+  border-radius:999px;
+  opacity:.85;
+  transition: background 160ms ease, opacity 160ms ease, transform 160ms ease;
+}
+
+.pw-toggle:hover{
+  background: rgba(59,130,246,.10);
+  opacity:1;
+}
+
+.pw-toggle:active{
+  transform: scale(.96);
+}
+.ltr{
+  direction: ltr;
+  unicode-bidi: plaintext;
+}
+
+.hint-small{
+  text-align:center;
+}
+
+.emoji{
+  display:inline-block;
+  margin-left:6px;
+}
+/* ☁️ gentle floating clouds */
+.bg-decor .cloud{
+  animation: cloudFloat 10s ease-in-out infinite;
+  filter: hue-rotate(185deg) saturate(1.7);
+}
+.bg-decor .c2{ animation-delay: -2s; }
+.bg-decor .c3{ animation-delay: -4s; }
+.bg-decor .c4{ animation-delay: -6s; }
+
+@keyframes cloudFloat{
+  0%,100%{ transform: translateY(0px) translateX(0px); }
+  50%{ transform: translateY(10px) translateX(6px); }
+}
+#lockCard{
+  position:relative;
+  overflow:hidden;
+}
+
+#lockCard::before{
+  content:"";
+  position:absolute;
+  inset:-2px;
+  background: radial-gradient(800px 280px at 20% 10%, rgba(255,255,255,.55), transparent 60%);
+  opacity:.7;
+  pointer-events:none;
+}
+
+#lockCard::after{
+  content:"";
+  position:absolute;
+  top:-40%;
+  left:-30%;
+  width:70%;
+  height:120%;
+  background: linear-gradient(120deg, rgba(255,255,255,.45), transparent 55%);
+  transform: rotate(12deg);
+  opacity:.35;
+  pointer-events:none;
+}
+#unlockBtn{
+  transition: transform 180ms ease, box-shadow 180ms ease, filter 180ms ease;
+}
+
+#unlockBtn:hover{
+  transform: translateY(-1px);
+  box-shadow:
+    0 18px 40px rgba(37,99,235,.35),
+    0 0 34px rgba(147,197,253,.55);
+  filter: saturate(1.05);
+}
+.lock-hero{
+  position:relative;
+  padding-bottom:10px;
+  margin-bottom:6px;
+}
+
+.lock-hero::after{
+  content:"";
+  position:absolute;
+  left:50%;
+  bottom:0;
+  transform:translateX(-50%);
+  width:140px;
+  height:1px;
+  background: linear-gradient(90deg, transparent, rgba(59,130,246,.35), transparent);
+}
+#lockErr{
+  background: rgba(255, 99, 132, .08);
+  border: 1px solid rgba(255, 99, 132, .22);
+  color: rgba(153, 27, 27, .92);
+  text-align:center;
+}
+/* =========================
+   ✅ FINAL CENTER PATCH (must be LAST)
+   ========================= */
+
+/* 1) force true centering for the whole page */
+body{
+  display:flex !important;
+  justify-content:center !important;
+  align-items:center !important;
+}
+
+/* 2) wrap should not shift */
+.wrap{
+  width:100% !important;
+  max-width:720px !important;
+  margin:0 auto !important;
+  display:flex !important;
+  justify-content:center !important;
+}
+
+/* 3) lock card: hard center */
+#lockCard{
+  width:100% !important;
+  max-width:720px !important;
+  margin:0 auto !important;
+  left:auto !important;
+  right:auto !important;
+  transform:none !important;
+}
+
+/* 4) lock row: stack + center */
+#lockCard .lock-row{
+  width:100% !important;
+  display:flex !important;
+  flex-direction:column !important;
+  align-items:center !important;
+  justify-content:center !important;
+  gap:14px !important;
+}
+
+/* 5) make password box full/center */
+#lockCard #pw,
+#lockCard .pw-field{
+  width:min(420px, 100%) !important;
+  margin:0 auto !important;
+}
+
+/* 6) unlock button: center + same width + bigger */
+#lockCard #unlockBtn{
+  display:block !important;
+  width:min(420px, 100%) !important;
+  margin:0 auto !important;
+  border-radius:999px !important;
+  padding:14px 18px !important;
+  font-size:16px !important;
+}
+
+/* 7) prevent desktop rule from putting them in a row */
+@media (min-width: 520px){
+  #lockCard .lock-row{
+    flex-direction:column !important;
+  }
+}
+/* =========================
+   ✅ SAFE CENTERING (Login only)
+   ========================= */
+
+/* default: allow tall pages like Builder to scroll */
+body{
+  display:block !important;
+  min-height:100vh;
+  overflow-y:auto;
+}
+
+/* keep wrap centered normally */
+.wrap{
+  width:min(720px, calc(100vw - 44px));
+  margin:0 auto;
+}
+
+/* ✅ ONLY center the login card nicely */
+#lockCard{
+  margin: 0 auto;
+}
+
+/* lock row always centered */
+#lockCard .lock-row{
+  width:100%;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:14px;
+}
+
+#lockCard #pw,
+#lockCard .pw-field{
+  width:min(420px, 100%);
+}
+
+#lockCard #unlockBtn{
+  width:min(420px, 100%);
+  margin:0 auto;
+  display:block;
+}
+#builderCard{
+  max-height: calc(100vh - 44px);
+  overflow:auto;
+}
+#letterCard{
+  background: rgba(255,255,255,.45);
+  border: 1px solid rgba(255,255,255,.55);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  box-shadow: 0 22px 55px rgba(0,0,0,.14);
+}
+#letterCard .meta-badge{
+  background: rgba(255,255,255,.55);
+  border: 1px dashed rgba(59,130,246,.25);
+  border-radius: 999px;
+  box-shadow: 0 14px 26px rgba(0,0,0,.08);
+  padding: 12px 16px;
+  font-weight: 700;
+}
+#letterCard .meta-badge span{
+  font-size: 13px;
+  opacity: .9;
+}
+/* envelope body glow */
+.env-body{
+  border-radius: 26px;
+  box-shadow: 0 26px 60px rgba(37,99,235,.16);
+}
+
+/* flap nicer + shine */
+.flap:before{
+  border-radius: 22px 22px 10px 10px;
+  box-shadow: 0 14px 26px rgba(0,0,0,.10);
+}
+
+/* seal -> strawberry */
+.seal{
+  font-size: 30px;
+}
+.seal::before{
+  content:"🍓";
+}
+.seal{
+  color: transparent; /* hide ❄️ if still inside */
+}
+
+/* paper looks softer */
+.paper{
+  box-shadow: 0 22px 55px rgba(0,0,0,.18);
+  border-radius: 22px;
+}
+.paper:before{
+  opacity:.22;
+}
+/* ===== PRETTY ENVELOPE ===== */
+
+/* بدنه پاکت */
+.env-body{
+  background: linear-gradient(180deg,
+    #e0f2fe 0%,
+    #bae6fd 45%,
+    #93c5fd 100%
+  );
+  border-radius: 28px;
+  border: 1px solid rgba(255,255,255,.6);
+  box-shadow:
+    0 30px 60px rgba(59,130,246,.18),
+    inset 0 1px 0 rgba(255,255,255,.6);
+  overflow:hidden;
+}
+
+/* بافت نرم و ابری */
+.env-body::before{
+  content:"";
+  position:absolute;
+  inset:0;
+  background:
+    radial-gradient(circle at 20% 30%, rgba(255,255,255,.65), transparent 55%),
+    radial-gradient(circle at 80% 40%, rgba(255,255,255,.45), transparent 60%);
+  opacity:.8;
+  pointer-events:none;
+}
+
+/* درِ پاکت (flap) */
+.flap:before{
+  background: linear-gradient(180deg,
+    #dbeafe 0%,
+    #93c5fd 100%
+  );
+  border-radius: 26px 26px 12px 12px;
+  box-shadow: 0 18px 28px rgba(0,0,0,.12);
+}
+
+/* لبه جلویی پاکت */
+.front{
+  background: linear-gradient(180deg,
+    rgba(255,255,255,.35),
+    rgba(0,0,0,.06)
+  );
+  border-radius: 26px;
+}
+
+/* مهر توت‌فرنگی 🍓 */
+.seal{
+  width:66px;
+  height:66px;
+  background: radial-gradient(circle at 30% 30%,
+    rgba(255,255,255,.6),
+    transparent 50%
+  ),
+  linear-gradient(180deg,#fb7185,#e11d48);
+  box-shadow: 0 18px 30px rgba(225,29,72,.35);
+  border: 1px solid rgba(255,255,255,.5);
+  font-size:30px;
+  color:transparent;
+}
+.seal::before{
+  content:"🍓";
+}
+
+/* یه حس شناور خیلی ملایم */
+.envelope{
+  animation: floaty 5s ease-in-out infinite;
+}
+@keyframes floaty{
+  0%,100%{ transform: translateY(0); }
+  50%{ transform: translateY(-6px); }
+}
+/* ✅ Minimal stamp */
+.stamp{
+  width:54px; height:54px;
+  border-radius:16px;
+  background: rgba(255,255,255,.65);
+  border:1px solid rgba(59,130,246,.22);
+  box-shadow: 0 14px 26px rgba(0,0,0,.10);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+.stamp:before{
+  inset:10px;
+  border:1.5px dashed rgba(59,130,246,.35);
+  border-radius:12px;
+}
+.stamp:after{
+  content:"🍓";
+  font-size:20px;
+  color: rgba(59,130,246,.95);
+}
+/* ✅ Replace red seal with cute strawberry seal */
+.seal{
+  background: radial-gradient(circle at 30% 30%,
+    rgba(255,255,255,.65),
+    transparent 55%
+  ),
+  linear-gradient(180deg,#fb7185,#e11d48) !important;
+
+  box-shadow: 0 18px 34px rgba(225,29,72,.30);
+  border:1px solid rgba(255,255,255,.55);
+  color:transparent;
+}
+.seal::before{ content:"🍓"; }
+/* ✅ hide CTA bubble */
+.cta{ display:none !important; }
+/* ✅ FORCE true center for login + letter */
+#lockCard, #letterCard{
+  position: fixed !important;
+  left: 50% !important;
+  top: 50% !important;
+  transform: translate(-50%, -50%) !important;
+  width: min(720px, 96vw) !important;
+  margin: 0 !important;
+  z-index: 10 !important;
+}
+
+/* ✅ Builder should NOT be fixed (so it can scroll) */
+#builderCard{
+  position: relative !important;
+  left: auto !important;
+  top: auto !important;
+  transform: none !important;
+  margin: 22px auto !important;
+  width: min(720px, 96
+  /* === MAGIC GLOW FIXED === */
+.env-body::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  background: radial-gradient(circle at 50% 60%,
+    rgba(147,197,253,.45),
+    transparent 70%);
+  opacity:0;
+  transition: opacity .6s ease;
+  pointer-events:none;
+}
+
+.envelope.open .env-body::after{
+  opacity:1;
+}
+/* === SEAL PULSE FIXED === */
+.seal{
+  animation: sealPulse 2.8s ease-in-out infinite;
+}
+
+.envelope.open .seal{
+  animation:none;
+}
+
+@keyframes sealPulse{
+  0%,100%{ scale:1; }
+  50%{ scale:1.08; }
+}
+  
+  </style>
+</head>
+<body>
+  <!-- Background decor -->
+<div class="bg-decor" aria-hidden="true">
+  <span class="cloud c1">☁️</span>
+  <span class="cloud c2">☁️</span>
+  <span class="cloud c3">☁️</span>
+  <span class="cloud c4">☁️</span>
+<span class="cloud c5">☁️</span>
+<span class="cloud c6">☁️</span>
+<span class="cloud c7">☁️</span>
+
+  <span class="berry b1">🍓</span>
+  <span class="berry b2">🍓</span>
+  <span class="berry b3">🍓</span>
+<span class="berry b4">🍓</span>
+<span class="berry b5">🍓</span>
+<span class="berry b6">🍓</span>
+</div>
+
+<!-- Letter rain -->
+<div id="rain" class="rain" aria-hidden="true"></div>
+  <div class="wrap">
+
+    <!-- ===== Lock Screen ===== -->
+    <div class="card" id="lockCard">
+      <div class="lock-hero">
+  <div class="lock-title">You have a secret letter</div>
+</div>
+      <h2>Enter the password I gave you kitty</h2>
+     <p class="hint-small ltr">
+  Hint : a kiss is the key to open the lock <span class="emoji">🪄</span>
+</p>
+
+      <div class="row">
+        <div class="pw-field">
+  <span class="pw-icon" aria-hidden="true">🔒</span>
+  <input id="pw" type="password" placeholder="Your secret password" autocomplete="off" />
+  <button class="pw-toggle" id="pwToggle" type="button" aria-label="Show password">👁️</button>
+</div>
+        <button class="btn" id="unlockBtn">باز کن</button>
+        <button class="btn ghost" id="builderBtn" type="button">Builder</button>
+      </div>
+
+      <div class="err" id="lockErr">رمز اشتباه است یا داده‌ی نامه معتبر نیست.</div>
+      <div class="hint" id="lockHint"></div>
+
+      <div class="divider"></div>
+      <div class="hint">
+        اگر Builder را نمی‌بینی: آخر آدرس صفحه <span class="pill">#builder</span> اضافه کن.
+      </div>
+    </div>
+
+    <!-- ===== Letter Scene ===== -->
+    <div class="card hidden" id="letterCard">
+      <div class="meta-badge" id="metaBadge">
+        <span id="fromSpan">From: —</span>
+        <span id="toSpan">To: —</span>
+      </div>
+
+      <div class="stage">
+        <div class="envelope-wrap">
+          <div class="envelope" id="envelope">
+            <div class="env-body">
+              <div class="stamp"></div>
+              <div class="address" aria-hidden="true">
+                <div class="line w1"></div>
+                <div class="line w2"></div>
+                <div class="line w3"></div>
+              </div>
+              <div class="seal">🍓</div>>
+              <div class="front"></div>
+            </div>
+
+            <div class="paper" id="paper">
+              <div class="paper-inner">
+                <div class="paper-title" id="paperTitle">نامه</div>
+                <div class="paper-text" id="paperText"></div>
+              </div>
+            </div>
+
+            <div class="flap" id="flap" title="Open"></div>
+            <div class="cta" id="cta">Click and open me</div>
+          </div>
+
+          <div class="tap-hint">Tap the envelope to open ✨</div>
+
+          <div class="row" style="justify-content:center; margin-top:12px;">
+            <button ... id="closeBtn">Close</button>
+<button ... id="resetBtn">Open again</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== Builder ===== -->
+    <div class="card hidden builder" id="builderCard">
+      <h2>Builder داخلی (ساخت payload رمزگذاری‌شده)</h2>
+      <p>
+        این بخش فقط برای <b>ساخت</b> نامه است. بعد از تولید خروجی، آن را داخل کد جایگزین می‌کنی.
+        Builder فقط وقتی دیده می‌شود که آخر آدرس <span class="pill">#builder</span> باشد.
+      </p>
+
+      <div class="row">
+        <div style="flex:1; min-width:240px">
+          <label class="hint">From</label>
+          <input id="bFrom" placeholder="مثلاً: Ali" />
+        </div>
+        <div style="flex:1; min-width:240px">
+          <label class="hint">To</label>
+          <input id="bTo" placeholder="مثلاً: Sara" />
+        </div>
+      </div>
+
+      <div style="margin-top:10px">
+        <label class="hint">Title (اختیاری)</label>
+        <input id="bTitle" placeholder="مثلاً: برای تو" />
+      </div>
+
+      <div style="margin-top:10px">
+        <label class="hint">متن نامه</label>
+        <textarea id="bMsg" placeholder="اینجا متن نامه را بنویس..."></textarea>
+      </div>
+
+      <div style="margin-top:10px">
+        <label class="hint">Password (رمز خصوصی)</label>
+        <input id="bPw" type="password" placeholder="یک رمز قوی انتخاب کن" autocomplete="off" />
+      </div>
+
+      <div class="row" style="margin-top:12px">
+        <button class="btn" id="genBtn" type="button">Generate payload</button>
+        <button class="btn ghost" id="copyBtn" type="button">Copy output</button>
+        <button class="btn ghost" id="exitBuilderBtn" type="button">خروج از Builder</button>
+      </div>
+
+      <div class="err" id="bErr"></div>
+
+      <div class="divider"></div>
+
+      <p class="hint" style="margin:0 0 8px">
+        خروجی زیر را کپی کن و در کد، جایگزین <b>const payload = {...}</b> کن:
+      </p>
+      <div class="codebox" id="outBox">{ /* output will appear here */ }</div>
+
+      <div class="divider"></div>
+      <p class="hint">
+        پیشنهاد امنیتی: رمز را طولانی و غیرقابل حدس انتخاب کن (مثلاً ترکیب حروف+عدد+علامت).
+        متن نامه بدون رمز قابل خواندن نیست.
+      </p>
+    </div>
+
+  </div>
+
+<script>
+/* =========================
+   0) PAYLOAD (این بخش را با خروجی Builder پر می‌کنی)
+   ========================= */
+const payload = 
+{
+  "from": "Boboo🫧",
+  "to": "HisStrawberryGirl🍓",
+  "title": "For you",
+  "saltB64": "qJVZHb7Rk9gZ9TXS5fetfA==",
+  "ivB64": "FF8vBryNjGTr7lGq",
+  "cipherB64": "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"
+}
+/* =========================
+   1) Crypto helpers (AES-GCM + PBKDF2)
+   ========================= */
+const enc = new TextEncoder();
+const dec = new TextDecoder();
+
+function b64ToBytes(b64) {
+  const bin = atob(b64);
+  const bytes = new Uint8Array(bin.length);
+  for (let i=0; i<bin.length; i++) bytes[i] = bin.charCodeAt(i);
+  return bytes;
+}
+function bytesToB64(bytes) {
+  let s = "";
+  bytes.forEach(b => s += String.fromCharCode(b));
+  return btoa(s);
+}
+
+async function deriveKey(password, saltBytes, usage /* 'encrypt'|'decrypt' */) {
+  const keyMaterial = await crypto.subtle.importKey(
+    "raw", enc.encode(password), { name: "PBKDF2" }, false, ["deriveKey"]
+  );
+  return crypto.subtle.deriveKey(
+    { name: "PBKDF2", salt: saltBytes, iterations: 150000, hash: "SHA-256" },
+    keyMaterial,
+    { name: "AES-GCM", length: 256 },
+    false,
+    [usage]
+  );
+}
+
+async function decryptLetter(password) {
+  const salt = b64ToBytes(payload.saltB64);
+  const iv = b64ToBytes(payload.ivB64);
+  const cipher = b64ToBytes(payload.cipherB64);
+
+  const key = await deriveKey(password, salt, "decrypt");
+  const plainBuf = await crypto.subtle.decrypt(
+    { name: "AES-GCM", iv },
+    key,
+    cipher
+  );
+  return dec.decode(plainBuf);
+}
+
+async function encryptLetter(password, plaintext) {
+  const salt = crypto.getRandomValues(new Uint8Array(16));
+  const iv = crypto.getRandomValues(new Uint8Array(12));
+  const key = await deriveKey(password, salt, "encrypt");
+
+  const cipherBuf = await crypto.subtle.encrypt(
+    { name: "AES-GCM", iv },
+    key,
+    enc.encode(plaintext)
+  );
+  const cipher = new Uint8Array(cipherBuf);
+
+  return {
+    saltB64: bytesToB64(salt),
+    ivB64: bytesToB64(iv),
+    cipherB64: bytesToB64(cipher)
+  };
+}
+
+/* =========================
+   2) UI logic
+   ========================= */
+const $ = (id) => document.getElementById(id);
+
+const lockCard = $("lockCard");
+const letterCard = $("letterCard");
+const builderCard = $("builderCard");
+
+const lockErr = $("lockErr");
+const lockHint = $("lockHint");
+const unlockBtn = $("unlockBtn");
+const builderBtn = $("builderBtn");
+
+const envelope = $("envelope");
+const flap = $("flap");
+const cta = $("cta");
+const closeBtn = $("closeBtn");
+const resetBtn = $("resetBtn");
+
+const fromSpan = $("fromSpan");
+const toSpan = $("toSpan");
+const paperTitle = $("paperTitle");
+const paperText = $("paperText");
+
+let lockedUntil = 0;
+let attempts = 0;
+
+function showLock() {
+  lockCard.classList.remove("hidden");
+  letterCard.classList.add("hidden");
+  builderCard.classList.add("hidden");
+}
+function showLetter() {
+  lockCard.classList.add("hidden");
+  letterCard.classList.remove("hidden");
+  builderCard.classList.add("hidden");
+}
+function showBuilder() {
+  lockCard.classList.add("hidden");
+  letterCard.classList.add("hidden");
+  builderCard.classList.remove("hidden");
+}
+
+function nowMs(){ return Date.now(); }
+
+function updateLockHint() {
+  const remain = Math.max(0, lockedUntil - nowMs());
+  if (remain > 0) {
+    lockHint.textContent = `به‌دلیل تلاش‌های ناموفق، لطفاً ${Math.ceil(remain/1000)} ثانیه صبر کن و دوباره امتحان کن.`;
+    unlockBtn.disabled = true;
+    return;
+  }
+  unlockBtn.disabled = false;
+  lockHint.textContent = "";
+}
+
+setInterval(updateLockHint, 300);
+
+function canTryUnlock() {
+  return nowMs() >= lockedUntil;
+}
+
+function openEnvelope() {
+  envelope.classList.add("open");
+}
+function closeEnvelope() {
+  envelope.classList.remove("open");
+}
+
+/* =========================
+   3) Unlock flow
+   ========================= */
+async function handleUnlock() {
+  lockErr.style.display = "none";
+  if (!canTryUnlock()) return;
+
+  // basic payload check
+  if ([payload.saltB64, payload.ivB64, payload.cipherB64].some(v => v === "REPLACE_ME")) {
+    lockErr.textContent = "payload هنوز ساخته نشده. اول Builder را با #builder باز کن و payload تولید کن.";
+    lockErr.style.display = "block";
+    return;
+  }
+
+  try {
+    const pw = $("pw").value || "";
+    const text = await decryptLetter(pw);
+
+    // success
+    attempts = 0;
+
+    fromSpan.textContent = `From: ${payload.from || "—"}`;
+    toSpan.textContent = `To: ${payload.to || "—"}`;
+    paperTitle.textContent = payload.title || "نامه";
+    paperText.textContent = text;
+
+    closeEnvelope();
+    showLetter();
+  } catch (e) {
+    attempts += 1;
+
+    // progressive lockout
+    if (attempts >= 3) lockedUntil = nowMs() + 10_000;     // 10s
+    if (attempts >= 5) lockedUntil = nowMs() + 30_000;     // 30s
+    if (attempts >= 7) lockedUntil = nowMs() + 90_000;     // 90s
+
+    lockErr.textContent = "رمز اشتباه است یا داده‌ی نامه معتبر نیست.";
+    lockErr.style.display = "block";
+  }
+}
+
+/* =========================
+   4) Builder logic
+   ========================= */
+function setBuilderOutput(obj) {
+  $("outBox").textContent = JSON.stringify(obj, null, 2);
+}
+
+async function generatePayload() {
+  const err = $("bErr");
+  err.style.display = "none";
+
+  const from = ($("bFrom").value || "").trim() || "—";
+  const to = ($("bTo").value || "").trim() || "—";
+  const title = ($("bTitle").value || "").trim() || "نامه";
+  const msg = $("bMsg").value || "";
+  const pw = $("bPw").value || "";
+
+  if (pw.length < 6) {
+    err.textContent = "رمز خیلی کوتاه است. حداقل ۶ کاراکتر (ترجیحاً طولانی‌تر) بگذار.";
+    err.style.display = "block";
+    return;
+  }
+  if (!msg.trim()) {
+    err.textContent = "متن نامه خالی است.";
+    err.style.display = "block";
+    return;
+  }
+
+  const crypt = await encryptLetter(pw, msg);
+
+  const out = {
+    from, to, title,
+    saltB64: crypt.saltB64,
+    ivB64: crypt.ivB64,
+    cipherB64: crypt.cipherB64
+  };
+
+  setBuilderOutput(out);
+}
+
+async function copyBuilderOutput() {
+  const txt = $("outBox").textContent || "";
+  if (!txt.trim()) return;
+  await navigator.clipboard.writeText(txt);
+  $("copyBtn").textContent = "Copied ✓";
+  setTimeout(()=> $("copyBtn").textContent = "Copy output", 900);
+}
+
+/* =========================
+   5) Routing (#builder)
+   ========================= */
+function route() {
+  const hash = (location.hash || "").toLowerCase();
+  if (hash === "#builder") showBuilder();
+  else showLock();
+}
+
+/* =========================
+   6) Events
+   ========================= */
+   /* ✅ show/hide password */
+const pwToggle = document.getElementById("pwToggle");
+if (pwToggle) {
+  pwToggle.addEventListener("click", () => {
+    const pw = document.getElementById("pw");
+    const isHidden = pw.type === "password";
+    pw.type = isHidden ? "text" : "password";
+    pwToggle.textContent = isHidden ? "🙈" : "👁️";
+    pwToggle.setAttribute("aria-label", isHidden ? "Hide password" : "Show password");
+  });
+}
+unlockBtn.addEventListener("click", handleUnlock);
+$("pw").addEventListener("keydown", (e)=>{ if(e.key==="Enter") handleUnlock(); });
+
+builderBtn.addEventListener("click", ()=>{ location.hash = "#builder"; route(); });
+
+cta.addEventListener("click", openEnvelope);
+flap.addEventListener("click", openEnvelope);
+resetBtn.addEventListener("click", ()=>{ closeEnvelope(); setTimeout(openEnvelope, 120); });
+closeBtn.addEventListener("click", closeEnvelope);
+
+$("genBtn").addEventListener("click", generatePayload);
+$("copyBtn").addEventListener("click", copyBuilderOutput);
+$("exitBuilderBtn").addEventListener("click", ()=>{
+  location.hash = "";
+  route();
+});
+
+window.addEventListener("hashchange", route);
+route();
+</script>
+</body>
+</html>
